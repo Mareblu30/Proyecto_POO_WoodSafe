@@ -10,15 +10,15 @@ class Nodo:
         self.puerto = puerto
         self.nodos_conectados = []
 
-    def conectar_nodo(self, nodo):
+    def conectar_nodo(self,nodo):
         if nodo not in self.nodos_conectados:
             self.nodos_conectados.append(nodo)
             print(f"{self.nickname} conectado con {nodo.nickname} ({nodo.direccion_ip}:{nodo.puerto})")
 
-    def recibir_datos(self, datos):
+    def recibir_datos(self,datos):
         print(f"{self.nickname} recibió datos: {datos}")
 
-    def enviar_datos(self, datos, nodo):
+    def enviar_datos(self,datos,nodo):
         print(f"{self.nickname} envió datos a {nodo.nickname}: {datos}")
         nodo.recibir_datos(datos)
 
@@ -33,7 +33,7 @@ class Blockchain:
     def __init__(self):
         self.lista_bloques = []
 
-    def añadir_bloque(self, bloque):
+    def añadir_bloque(self,bloque):
         self.lista_bloques.append(bloque)
         print(f"Bloque añadido a la cadena: {bloque.id}")
 
@@ -64,7 +64,7 @@ class Bloque:
 
 
 class Transaccion:
-    def __init__(self, id, datos, timestamp):
+    def __init__(self,id,datos,timestamp):
         self.id = id
         self.datos = datos
         self.timestamp = timestamp
@@ -78,7 +78,7 @@ class Transaccion:
 
 
 class Archivo:
-    def __init__(self, nombre, tipo, contenido):
+    def __init__(self,nombre,tipo,contenido):
         self.nombre = nombre
         self.tipo = tipo
         self.contenido = contenido
@@ -95,14 +95,14 @@ class RedP2P:
     def __init__(self):
         self.nodos = []
 
-    def registrar_nodo(self, nodo):
+    def registrar_nodo(self,nodo):
         self.nodos.append(nodo)
         print(f"Nodo registrado en la red: {nodo.nickname} ({nodo.direccion_ip}:{nodo.puerto})")
 
     def obtener_nodos(self):
         return self.nodos
 
-    def propagar_informacion(self, datos):
+    def propagar_informacion(self,datos):
         for nodo in self.nodos:
             nodo.recibir_datos(datos)
 
@@ -112,11 +112,11 @@ class RedP2P:
 
 
 class ProtocoloConsenso:
-    def resolver_conflictos(self, nodos):
+    def resolver_conflictos(self,nodos):
         print("Resolviendo conflictos...")
         return Blockchain()
 
-    def verificar_transaccion(self, transaccion):
+    def verificar_transaccion(self,transaccion):
         return True  # Simulación de verificación
 
     def iniciar_proceso_consenso(self):
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     nodo3 = Nodo(id="Nodo3", nickname="Usuario3", direccion_ip="192.168.1.3", puerto=8003)
     nodo4 = Nodo(id="Nodo4", nickname="Usuario4", direccion_ip="192.168.1.4", puerto=8004)
     nodo5 = Nodo(id="Nodo5", nickname="Usuario5", direccion_ip="192.168.1.5", puerto=8005)
-
+    
     # Conectar nodos
     nodo1.conectar_nodo(nodo2)
     nodo2.conectar_nodo(nodo3)
