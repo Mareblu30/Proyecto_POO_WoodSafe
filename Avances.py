@@ -28,7 +28,6 @@ class Nodo:
     def obtener_estado(self):
         return "Activo" if self.validar_nodo() else "Inactivo"
 
-
 class Blockchain:
     def __init__(self):
         self.lista_bloques = []
@@ -46,7 +45,6 @@ class Blockchain:
     def revisar_integridad(self):
         return all(bloque.verificar_integridad() for bloque in self.lista_bloques)
 
-
 class Bloque:
     def __init__(self,id,hash_anterior,datos,transacciones):
         self.id = id
@@ -62,7 +60,6 @@ class Bloque:
     def verificar_integridad(self):
         return self.calcular_hash() == self.hash_actual
 
-
 class Transaccion:
     def __init__(self,id,datos,timestamp):
         self.id = id
@@ -76,7 +73,6 @@ class Transaccion:
     def verificar_firma_digital(self):
         return True  # Simulación de verificación
 
-
 class Archivo:
     def __init__(self,nombre,tipo,contenido):
         self.nombre = nombre
@@ -89,7 +85,6 @@ class Archivo:
 
     def obtener_metadatos(self):
         return {"nombre": self.nombre, "tipo": self.tipo, "hash": self.hash}
-
 
 class RedP2P:
     def __init__(self):
@@ -110,7 +105,6 @@ class RedP2P:
         self.nodos.remove(nodo)
         print(f"Nodo desconectado: {nodo.nickname}")
 
-
 class ProtocoloConsenso:
     def resolver_conflictos(self,nodos):
         print("Resolviendo conflictos...")
@@ -121,7 +115,6 @@ class ProtocoloConsenso:
 
     def iniciar_proceso_consenso(self):
         print("Iniciando el proceso de consenso...")
-
 
 # Instanciación y ejecución
 if __name__ == "__main__":
