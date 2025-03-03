@@ -11,7 +11,7 @@
 -  **Verificación de Autenticidad**: Utiliza **SHA-256** para garantizar que los documentos no han sido alterados.  
 -  **Detección de Manipulaciones**: Implementa mecanismos para identificar cambios no autorizados en la cadena de bloques.  
 -  **Simulación de Ataques**: Herramienta para probar la resiliencia del sistema ante intentos de fraude o corrupción de datos.  
--  **Interfaz Gráfica Moderna**: Gestión visual de nodos y blockchain con una interfaz web en **Next.js**.  
+-  **Interfaz Gráfica Moderna**: Gestión visual de nodos y blockchain .  
 
 ##  **Utilizamos**  
 
