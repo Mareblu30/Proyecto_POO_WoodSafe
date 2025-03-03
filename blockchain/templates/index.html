@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red P2P - Blockchain</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-custom {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-custom .navbar-brand {
+            color: #ecf0f1;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .toast-custom {
+            background-color: #2c3e50 !important;
+            color: white !important;
+            border-radius: 10px !important;
+        }
+        .toast-header-custom {
+            background-color: #34495e !important;
+            color: white !important;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .btn-custom {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-custom:hover {
+            background-color: #2980b9;
+        }
+        .hash-display {
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.8em;
+            background-color: #ecf0f1;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .blockchain-card {
+            background-color: white;
+            border-left: 5px solid #3498db;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .blockchain-card.genesis {
+            border-left-color: #2ecc71;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .transaction-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .transaction-item {
+            background-color: #f8f9fa;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-link"></i> Red P2P - Blockchain
+            </a>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Gestión de Nodos y Blockchain</h1>
+
+        <!-- Formulario para añadir nodo -->
+        <div class="card card-custom mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-plus"></i> Añadir Nuevo Nodo
+            </div>
+            <div class="card-body">
+                <form id="addNodeForm">
+                    <div class="mb-3">
+                        <label for="node_id" class="form-label">ID del Nodo:</label>
+                        <input type="text" class="form-control" id="node_id" name="node_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="port" class="form-label">Puerto:</label>
+                        <input type="number" class="form-control" id="port" name="port" required min="1024" max="65535">
+                    </div>
+                    <button type="submit" class="btn btn-custom w-100">
+                        <i class="fas fa-save"></i> Crear Nodo
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de nodos -->
+        <div class="card card-custom mb-4">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-network-wired"></i> Nodos en la Red
+            </div>
+            <div class="card-body">
+                <div id="nodesList" class="row"></div>
+            </div>
+        </div>
+
+        <!-- Formulario para subir archivo -->
+        <div class="card card-custom mb-4">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-upload"></i> Subir Archivo
+            </div>
+            <div class="card-body">
+                <form id="uploadFileForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="upload_node_id" class="form-label">ID del Nodo:</label>
+                        <input type="text" class="form-control" id="upload_node_id" name="node_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Seleccionar Archivo:</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                    </div>
+                    <button type="submit" class="btn btn-custom w-100">
+                        <i class="fas fa-cloud-upload-alt"></i> Subir Archivo
+                    </button>
+                </form>
+                <div id="uploadResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Formulario para solicitar archivo -->
+        <div class="card card-custom mb-4">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-download"></i> Solicitar Archivo
+            </div>
+            <div class="card-body">
+                <form id="requestFileForm">
+                    <div class="mb-3">
+                        <label for="request_node_id" class="form-label">ID del Nodo Solicitante:</label>
+                        <input type="text" class="form-control" id="request_node_id" name="node_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="peer_id" class="form-label">ID del Peer:</label>
+                        <input type="text" class="form-control" id="peer_id" name="peer_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file_hash" class="form-label">Hash del Archivo:</label>
+                        <input type="text" class="form-control" id="file_hash" name="file_hash" required>
+                    </div>
+                    <button type="submit" class="btn btn-custom w-100">
+                        <i class="fas fa-file-download"></i> Solicitar Archivo
+                    </button>
+                </form>
+                <div id="requestResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Blockchain -->
+        <div class="card card-custom mb-4">
+            <div class="card-header bg-dark text-white">
+                <i class="fas fa-link"></i> Blockchain
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <select id="blockchain-node-selector" class="form-select mb-3">
+                        <option selected disabled>Cargando nodos...</option>
+                    </select>
+                </div>
+                <div id="blockchainList">
+                    <div class="alert alert-info">Cargando blockchain...</div>
+                </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <button id="refreshBlockchain" class="btn btn-custom">
+                        <i class="fas fa-sync"></i> Actualizar Blockchain
+                    </button>
+                    <button id="validateBlockchain" class="btn btn-custom">
+                        <i class="fas fa-check-circle"></i> Validar Integridad
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulador de Hackeo -->
+        <div class="card card-custom mb-4">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-bug"></i> Simulador de Hackeo
+            </div>
+            <div class="card-body">
+                <form id="hackForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="hack_node_id" class="form-label">Nodo a hackear:</label>
+                            <select class="form-select" id="hack_node_id" name="node_id" required>
+                                <option disabled selected>Cargando nodos...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="block_index" class="form-label">Bloque a modificar:</label>
+                            <input type="number" class="form-control" id="block_index" name="block_index" min="1" value="1" required>
+                            <small class="text-muted">El bloque génesis (0) está protegido</small>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-custom w-100">
+                                <i class="fas fa-bug"></i> Simular Hackeo
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div id="hackResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container">
+            <p class="mb-0">© 2023 Red P2P - Blockchain. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Área de notificaciones -->
+    <div id="notificationsArea" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script>
+        // Cargar nodos y blockchain al iniciar
+        let currentBlockchainNode = null;
+
+        async function loadNodes() {
+            try {
+                const response = await fetch('/api/list_nodes');
+                const data = await response.json();
+                if (data.success) {
+                    renderNodes(data.nodes);
+                    updateNodeSelectors();
+                    if (!currentBlockchainNode && data.nodes) {
+                        const firstNode = Object.keys(data.nodes)[0];
+                        if (firstNode) {
+                            currentBlockchainNode = firstNode;
+                            loadBlockchain();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error cargando nodos:", error);
+            }
+        }
+
+        function renderNodes(nodes) {
+            const nodesList = document.getElementById('nodesList');
+            nodesList.innerHTML = '';
+
+            for (const [nodeId, nodeData] of Object.entries(nodes)) {
+                const nodeCard = document.createElement('div');
+                nodeCard.className = 'col-md-6 col-lg-4 mb-3';
+                nodeCard.innerHTML = `
+                    <div class="card card-custom h-100">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="fas fa-server"></i> Nodo ${nodeId}
+                        </div>
+                        <div class="card-body">
+                            <p><i class="fas fa-plug"></i> Puerto: ${nodeData.puerto}</p>
+                            <p><i class="fas fa-users"></i> Peers: ${Object.keys(nodeData.peers).length}</p>
+                            <p><i class="fas fa-file"></i> Archivos: ${Object.keys(nodeData.archivos).length}</p>
+                        </div>
+                    </div>
+                `;
+                nodesList.appendChild(nodeCard);
+            }
+        }
+
+        function updateNodeSelectors() {
+            const blockchainSelector = document.getElementById('blockchain-node-selector');
+            const hackSelector = document.getElementById('hack_node_id');
+            
+            fetch('/api/list_nodes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const nodeIds = Object.keys(data.nodes);
+                        
+                        blockchainSelector.innerHTML = nodeIds.map(nodeId => `
+                            <option value="${nodeId}" ${currentBlockchainNode === nodeId ? 'selected' : ''}>
+                                Blockchain de ${nodeId}
+                            </option>
+                        `).join('');
+                        
+                        hackSelector.innerHTML = nodeIds.map(nodeId => `
+                            <option value="${nodeId}">${nodeId}</option>
+                        `).join('');
+                    }
+                });
+        }
+
+        async function loadBlockchain() {
+            try {
+                const selector = document.getElementById('blockchain-node-selector');
+                const nodeId = selector.value;
+                currentBlockchainNode = nodeId;
+                
+                const response = await fetch(`/api/verify_blockchain?node_id=${nodeId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderBlockchain(data.blockchain);
+                } else {
+                    document.getElementById('blockchainList').innerHTML = `
+                        <div class="alert alert-danger">Error al cargar blockchain: ${data.message}</div>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error cargando blockchain:", error);
+            }
+        }
+
+        function renderBlockchain(blockchain) {
+            const blockchainList = document.getElementById('blockchainList');
+            blockchainList.innerHTML = '';
+
+            blockchain.forEach((block, index) => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = `blockchain-card ${index === 0 ? 'genesis' : ''}`;
+                blockDiv.innerHTML = `
+                    <h5>Bloque #${block.index} ${index === 0 ? '(Génesis)' : ''}</h5>
+                    <p><strong>Hash:</strong> <span class="hash-display">${block.hash}</span></p>
+                    <p><strong>Hash Anterior:</strong> <span class="hash-display">${block.previous_hash}</span></p>
+                    <p><strong>Timestamp:</strong> ${new Date(block.timestamp * 1000).toLocaleString()}</p>
+                    <p><strong>Nonce:</strong> ${block.nonce}</p>
+                    <div class="transactions">
+                        <strong>Transacciones (${block.transactions.length}):</strong>
+                        <div class="transaction-list">
+                            ${block.transactions.map(tx => `
+                                <div class="transaction-item">
+                                    <div>De: ${tx.sender}</div>
+                                    <div>Para: ${tx.receiver}</div>
+                                    ${tx.file_hash ? `<div>Hash: <span class="hash-display">${tx.file_hash}</span></div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                blockchainList.appendChild(blockDiv);
+            });
+        }
+
+        function showNotification(title, message, type = 'info') {
+            const notificationsArea = document.getElementById('notificationsArea');
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-custom';
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.innerHTML = `
+                <div class="toast-header toast-header-custom">
+                    <strong class="me-auto">${title}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            `;
+            
+            notificationsArea.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Event Listeners
+        document.getElementById('addNodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/add_node', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                showNotification('Éxito', data.message, 'success');
+                await loadNodes();
+                loadBlockchain();
+            } else {
+                showNotification('Error', data.message, 'danger');
+            }
+        });
+
+        document.getElementById('uploadFileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/upload_file', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            const uploadResult = document.getElementById('uploadResult');
+            if (data.success) {
+                uploadResult.innerHTML = `
+                    <div class="alert alert-success">
+                        Archivo subido. Hash: <span class="hash-display">${data.hash}</span>
+                    </div>
+                `;
+                await loadNodes();
+                loadBlockchain();
+                showNotification('Éxito', 'Archivo subido y blockchain actualizado', 'success');
+            } else {
+                uploadResult.innerHTML = `
+                    <div class="alert alert-danger">${data.message}</div>
+                `;
+            }
+        });
+
+        document.getElementById('requestFileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/request_file', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            const requestResult = document.getElementById('requestResult');
+            if (data.success) {
+                requestResult.innerHTML = `
+                    <div class="alert alert-success">Archivo recibido correctamente</div>
+                `;
+                await loadNodes();
+                loadBlockchain();
+                showNotification('Éxito', 'Archivo transferido y blockchain actualizado', 'success');
+            } else {
+                requestResult.innerHTML = `
+                    <div class="alert alert-danger">${data.message}</div>
+                `;
+            }
+        });
+
+        document.getElementById('refreshBlockchain').addEventListener('click', () => {
+            loadBlockchain();
+            showNotification('Actualización', 'Blockchain actualizado', 'info');
+        });
+
+        document.getElementById('validateBlockchain').addEventListener('click', async () => {
+            const nodeId = document.getElementById('blockchain-node-selector').value;
+            const response = await fetch(`/api/check_integrity?node_id=${nodeId}`);
+            const data = await response.json();
+            if (data.success) {
+                showNotification(
+                    data.integrity.valid ? 'Blockchain válido' : 'Blockchain comprometido',
+                    data.integrity.valid ? 'La cadena está intacta' : 'Se detectaron modificaciones',
+                    data.integrity.valid ? 'success' : 'danger'
+                );
+            }
+        });
+
+        document.getElementById('hackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/simulate_hack', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            const hackResult = document.getElementById('hackResult');
+            if (data.success) {
+                hackResult.innerHTML = `
+                    <div class="alert alert-success">
+                        ${data.hack_result.message}<br>
+                        <button class="btn btn-warning btn-sm mt-2" onclick="loadBlockchain()">
+                            Actualizar Blockchain
+                        </button>
+                    </div>
+                `;
+                loadBlockchain();
+                showNotification('Hackeo simulado', 'La blockchain ha sido modificada', 'warning');
+            } else {
+                hackResult.innerHTML = `
+                    <div class="alert alert-danger">${data.message}</div>
+                `;
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNodes();
+            document.getElementById('blockchain-node-selector').addEventListener('change', loadBlockchain);
+        });
+    </script>
+</body>
+</html>
